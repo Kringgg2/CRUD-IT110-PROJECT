@@ -1,0 +1,168 @@
+{% extends 'layout/layout.html' %}
+{% block content %}
+
+
+
+<div class="container-fluid">
+    <h3 class="text-dark mb-4">Orders</h3>
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <p class="text-primary m-0 fw-bold"><a  href="{% url 'new_order' %}" class="btn btn-primary btn-sm">New Order</a></p>
+        </div>
+        <div class="card-body">
+
+            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                <table class="table my-0" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date Time</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Customer</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        {% for x in orders %}
+                        <tr>
+                            <td>{{ x.id }}</td>          
+                            <td>{{ x.created_at }}</td>                     
+                            <td>{{ x.product_id__product_name }}</td>
+                            <td>{{ x.quantity }}</td>
+                            <td>{{ x.customer_id_id__firstname }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-warning m-1" onclick="edit(this)" data-id="{{ x.id }}" data-name="{{ x.product_id__product_name }}" data-qty="{{ x.quantity }}"><i class="fas fa-edit"></i></a>
+                                <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete this row?')){window.location.href = 'delete/{{ x.id }}'}"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        {% endfor %}
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                </div>
+                <div class="col-md-6">
+                    <nav class="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
+                        <ul class="pagination">
+                            <li class="page-item {% if not orders.has_previous %} disabled {% endif %}">
+                                <a class="page-link" aria-label="Previous" href="{% if orders.has_previous %} ?page={{ orders.previous_page_number }} {% endif %}"><span aria-hidden="true">«</span></a>
+                            </li>
+
+                            {# Loop pages number #}
+                            {% for i in num_of_pages %}
+
+                                <li class="page-item {% if orders.number == forloop.counter %} active {% endif %}"><a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+
+                            {%endfor%}
+
+                            <li class="page-item {% if not orders.has_next %} disabled {% endif %}">
+                                <a class="page-link" aria-label="Next" href="{% if orders.has_next %} ?page={{ orders.next_page_number }} {% endif %}"><span aria-hidden="true">»</span></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="EditQuantityModal" tabindex="-1" aria-labelledby="EditQuantityModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Quantity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-4 mb-6">
+                            <label for="product_id" class="col-form-label">ID:</label>
+                            <input type="text" class="form-control" id="product_id" name="product_id" readonly>
+                        </div>
+                        <div class="col-8 mb-6">
+                            <label for="product_name" class="col-form-label">Name:</label>
+                            <input type="text" class="form-control" id="product_name" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="product_quantity" class="col-form-label">Quantity</label>
+                        <input type="number" class="form-control" id="product_quantity" name="product_quantity">
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel_edit">Cancel</button>
+                <button class="btn btn-success text-light" id="save_edit">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function edit(elem){
+        $('#EditQuantityModal').modal('toggle');
+
+        $('#product_id').val(elem.dataset.id)
+        $('#product_name').val(elem.dataset.name)
+        $('#product_quantity').attr("placeholder", elem.dataset.qty)
+        $('#product_quantity').val("")
+
+    }
+
+
+    $(document).ready(function(){
+
+        // Send Ajax and edit Quantity
+        $("#save_edit").click(function(){
+
+            if(confirm('Save Changes?')){
+                // Ajax request
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'update_order_quantity' %}",
+                    data: {
+                        id:  $('#product_id').val(),
+                        quantity: $('#product_quantity').val(),
+                    },
+                    success: function (response) {
+
+                        // Reloads page after success saving
+                        // location.reload();
+                        console.log(response)
+
+                    },
+                    error: function (response) {
+                        console.log(response)
+                    }
+                })
+
+                // Close Modal
+                $('#EditQuantityModal').modal('toggle');
+            }
+
+        })
+
+
+        $("#cancel_edit").click(function(){
+            // Close Modal
+            $('#EditQuantityModal').modal('toggle');
+        })
+
+    });
+</script>
+
+{% endblock %}

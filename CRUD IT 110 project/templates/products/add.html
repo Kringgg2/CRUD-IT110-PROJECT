@@ -1,0 +1,24 @@
+{% extends 'layout/layout.html' %}
+{% block content %}
+
+<div class="container-fluid">
+
+<h3 class="text-dark mb-4">Product / New Product</h3>
+
+    <div class="card shadow">
+        <div class="card-body">
+
+            <form action="save/" method="post">
+                {% csrf_token %}
+
+                {{form}}
+
+                <input class="btn btn-primary mt-3" type="submit" value="Add Product">
+                <a class="btn btn-secondary mt-3" href="{{request.META.HTTP_REFERER|escape}}">Back</a>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'layout/layout.html' %}
+{% block content %}
+
+<div class="container-fluid">
+    <h3 class="text-dark mb-4">Products</h3>
+    
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <p class="text-primary m-0 fw-bold"><a  href="{% url 'new_product' %}" class="btn btn-primary btn-sm">New Product</a></p>
+        </div>
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-6 text-nowrap">
+                </div>
+                <div class="col-md-6">
+                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label class="form-label">
+                        <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+                            <div class="input-group"><input id="search"  class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                <table class="table my-0" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Cost</th>
+                            <th>Retail</th>
+                            <th>On hand</th>
+                            <th>Minimum</th>
+                            <th>Total Purchased</th>
+                            <th>Total Ordered</th>
+                            <th>Supplier</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for x in products %}
+                        <tr>
+                            <td>{{ x.id }}</td>          
+                            <td><a>{{ x.product_name }}</a></td>                 
+                            <td>&#8369; {{ x.price_per_piece }}</td>
+                            <td>&#8369; {{ x.retail_per_piece }}</td>
+                            <td>{{ x.inventory_on_hand }}</td>
+                            <td>{{ x.minimum_required }}</td>
+                            <td>{{ x.inventory_received }}</td>
+                            <td>{{ x.inventory_shipped }}</td>
+                            <td>{{ x.supplier__supplier }}</td>
+                            <td><button class="btn btn-sm btn-warning" onclick="window.location.href = 'update/{{ x.id }}'"><i class="fas fa-edit"></i></button></td>
+                            <td><button class="btn btn-sm btn-danger" onclick="if(confirm('Delete this row?')){window.location.href = 'delete/{{ x.id }}'}"><i class="fas fa-trash-alt"></i></button></td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Pagination -->
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                </div>
+                <div class="">
+                    <nav class="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
+                        <ul class="pagination">
+                            <li class="page-item {% if not products.has_previous %} disabled {% endif %}">
+                                <a class="page-link" aria-label="Previous" href="{% if products.has_previous %} ?page={{ products.previous_page_number }} {% endif %}"><span aria-hidden="true">«</span></a>
+                            </li>
+
+                            {# Loop pages number #}
+                            {% for i in num_of_pages %}
+
+                                <li class="page-item {% if products.number == forloop.counter %} active {% endif %}"><a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+
+                            {%endfor%}
+
+                            <li class="page-item {% if not products.has_next %} disabled {% endif %}">
+                                <a class="page-link" aria-label="Next" href="{% if products.has_next %} ?page={{ products.next_page_number }} {% endif %}"><span aria-hidden="true">»</span></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Has Previous: {{ products.has_previous }} <br>
+            Has Next: {{ products.has_next }} <br>
+            Next: {{ products.number|add:1 }} <br>
+            Current Page: {{ products.number }} <br>
+            Number of Pages: {{ products.paginator.num_pages}}<br> -->
+
+        </div>
+    </div>
+
+</div>
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-lg-6 mt-3">
+            <div class="card card-shadow">
+                <div class="card-header py-3">
+                    <div class="row">
+                        <div class="col-6"><p class="text-primary m-0 fw-bold"><a  href="{% url 'new_purchase' %}" class="btn btn-primary btn-sm">Make Purchase</a></p></div>
+                        <div class="col-6 text-end"><span class="text-primary m-0 fw-bold pe-2">Recent Purchases</span></div>
+                    </div>
+                    
+                </div>
+                <div class="card-body">
+
+                    <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                        <table class="table my-0" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date Time</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for x in purchases %}
+                                <tr>
+                                    <td>{{ x.id }}</td>          
+                                    <td>{{ x.created_at }}</td>                     
+                                    <td>{{ x.product_id__product_name }}</td>
+                                    <td>{{ x.quantity }}</td>
+                                {% endfor %}
+        
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <a href="{% url 'purchases' %}">View All</a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mt-3">
+            <div class="card card-shadow">
+                <div class="card-header py-3">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-primary m-0 fw-bold"><a  href="{% url 'new_order' %}" class="btn btn-primary btn-sm">Make Order</a></p>
+                        </div>
+                        <div class="col-6 text-end"><span class="text-primary m-0 fw-bold pe-2">Recent Orders</span></div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                        <table class="table my-0" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date Time</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for x in orders %}
+                                <tr>
+                                    <td>{{ x.id }}</td>          
+                                    <td>{{ x.created_at }}</td>                 
+                                    <td>{{ x.product_id__product_name }}</td>
+                                    <td>{{ x.quantity }}</td>
+                                {% endfor %}
+        
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <a href="{% url 'orders' %}">View All</a>
+
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+</div>
+
+    
+
+{% endblock %}
+
+{% block script %}
+
+<script> 
+
+    $( function() {
+    
+    
+        $("#search").autocomplete({
+            minLength: 1,
+            appendTo: $(this).parent(),
+            source: "{% url 'search' %}",
+            
+            select: function (event, ui) {
+                event.preventDefault();
+                console.log('data: ' + ui.item.value.id)
+                console.log('url when clicked: ' + ui.item.value.url )
+                window.location.href = ui.item.value.url
+            },
+    
+            focus: function (event, ui) {
+                event.preventDefault();
+                $("#product_search").val(ui.item.label)
+                $("#product_search").val(ui.item.label)
+            },
+    
+            
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li></li>")
+                .data("item.autocomplete", item)
+                .append("<a class='list-group-item' href='" + item.value.url + "'>" + item.label + "</a>")
+                .appendTo(ul);
+        };
+    
+    });
+        
+    
+</script>
+    
+{% endblock %}
